@@ -10,6 +10,8 @@ import React from "react";
 import RoomJoinPage from "./RoomJoinPage";
 import CreateRoomPage from "./CreateRoomPage";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import Room from './Room';
+
 
 export default function HomePage() {
   return (
@@ -23,6 +25,7 @@ export default function HomePage() {
 
         {/* create route -> loads CreateRoomPage component */}
         <Route path="/create" element={<CreateRoomPage />} />
+        <Route path="/room/:roomCode" element={<Room />}/>
       </Routes>
     </Router>
   );

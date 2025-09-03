@@ -9,9 +9,11 @@
 
 
 from django.urls import path
-from .views import RoomView, CreateRoomView
+from .views import RoomView, CreateRoomView, GetRoom, JoinRoom
 
 urlpatterns = [
-    path('rooms', RoomView.as_view()),          # GET → list all rooms
-    path('create-room', CreateRoomView.as_view())  # POST → create/update room
+    path('room', RoomView.as_view()),          # GET → list all rooms
+    path('create-room', CreateRoomView.as_view()),  # POST → create/update room
+    path('get-room',GetRoom.as_view()),
+    path('join-room', JoinRoom.as_view()),
 ]

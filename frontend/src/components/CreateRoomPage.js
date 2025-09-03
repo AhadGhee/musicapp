@@ -12,13 +12,15 @@ import Radio from "@mui/material/Radio";            // radio input
 import RadioGroup from "@mui/material/RadioGroup";  // groups radio buttons
 import FormControlLabel from "@mui/material/FormControlLabel"; // label+radio combined
 
+
 // ✅ React Router component for client-side navigation (SPA links)
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 // =======================================================
 // ✅ Functional component definition
 // =======================================================
 export default function CreateRoomPage() {
+   const navigate = useNavigate();
   // -------------------------------
   // ✅ State Management (React Hooks)
   // -------------------------------
@@ -30,13 +32,16 @@ export default function CreateRoomPage() {
   // setVotesToSkip → function to update it
   const [votesToSkip, setVotesToSkip] = useState(2);
 
+  
+
   // -------------------------------
   // ✅ Event Handlers (logic)
   // -------------------------------
 
   // When the number input changes, update state
   const handleVotesChange = (e) => {
-    setVotesToSkip(e.target.value); // controlled input → always tied to state
+   setVotesToSkip(e.target.value); // controlled input → always tied to state
+   
   };
 
   // When radio buttons change, update guestCanPause
@@ -48,17 +53,24 @@ export default function CreateRoomPage() {
 
   // When "Create A Room" button is pressed
   const handleRoomButtonPressed = () => {
-    // Print current state in console (for debugging or API request later)
-      const requestOptions = {
-         method: 'POST',
-         headers: {'Content-Type': 'application/json'},
-         body: JSON.stringify({
-            votes_to_skip: votesToSkip,
-            guest_can_pause: guestCanPause
-         }),
-      };
-      fetch('/api/create-room', requestOptions).then((response) => response.json()
-   ).then((data) => console.log(data));
+    const requestOptions = {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        votes_to_skip: votesToSkip,
+        guest_can_pause: guestCanPause,
+      }),
+    };
+
+    fetch("/api/create-room", requestOptions)
+      .then((response) => response.json())
+      .then((data) => {
+        // ✅ navigate to new room page
+        navigate("/room/" + data.code);
+      })
+      .catch((error) => {
+        console.error("Error creating room:", error);
+      });
   };
 
   // -------------------------------
@@ -85,7 +97,7 @@ export default function CreateRoomPage() {
         {/* ----------------- Radio Buttons ----------------- */}
         <FormControl component="fieldset" style={{ marginTop: 20 }}>
           <FormHelperText>
-            <div align="center">Guest Control of Playback State</div>
+            <div>Guest Control of Playback State</div>
           </FormHelperText>
 
           <RadioGroup
