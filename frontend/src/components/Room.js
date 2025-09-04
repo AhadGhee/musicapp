@@ -17,26 +17,31 @@ export default function Room() {
     const { roomCode } = useParams();
     const navigate = useNavigate();
 
-  useEffect(() => {
-    fetch("/api/get-room?code=" + roomCode)
-      .then((response) => {
-        if (!response.ok) {
+    const getRoomDetails = () => {
+        fetch("/api/get-room?code=" + roomCode)
+        .then((response) => {
+            if (!response.ok) {
             navigate("/create");
             throw new Error("Failed to fetch room details");
-           
+            }
+            return response.json();
+        })
+        .then((data) => {
+            setVotesToSkip(data.votes_to_skip);
+            setGuestCanPause(data.guest_can_pause);
+            setIsHost(data.is_host);
+        })
+        .catch((error) => {
+            console.error("Error fetching room details:", error);
+        });
+    };
 
-        }
-        return response.json();
-      })
-      .then((data) => {
-        setVotesToSkip(data.votes_to_skip);
-        setGuestCanPause(data.guest_can_pause);
-        setIsHost(data.is_host);
-      })
-      .catch((error) => {
-        console.error("Error fetching room details:", error);
-      });
-  }, [roomCode]); // <- runs when roomCode changes
+    // -------------------------------
+    // useEffect runs on mount/roomCode change
+    // -------------------------------
+    useEffect(() => {
+        getRoomDetails();
+    }, [roomCode]);
 
 
     const leaveButtonPressed = () => {
@@ -70,7 +75,7 @@ export default function Room() {
         return (
         <Grid container spacing={1}>
             <Grid item xs={12} align="center">
-                <CreateRoomPage update={true} votesToSkip={votesToSkip} guestCanPause={guestCanPause} roomCode={roomCode} updateCallback={() => {}}></CreateRoomPage>
+                <CreateRoomPage update={true} votesToSkip={votesToSkip} guestCanPause={guestCanPause} roomCode={roomCode} updateCallback={getRoomDetails}></CreateRoomPage>
             </Grid>
             <Grid item xs={12} align="center">
                     <Button 

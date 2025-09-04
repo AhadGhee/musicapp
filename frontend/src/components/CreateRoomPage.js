@@ -70,35 +70,34 @@ const updateButtonPressed = () => {
     body: JSON.stringify({
       votes_to_skip: votesToSkip,
       guest_can_pause: guestCanPause,
-      code: props.roomCode, // make sure prop name matches your component
+      code: props.roomCode, // must match what your backend expects
     }),
   };
 
   fetch("/api/update-room", requestOptions)
     .then((response) => {
       if (response.ok) {
-        // ✅ If request was successful, parse JSON
-        console.log("Update response:", data);
-        setSuccessMsg("Room updated successfully!😜")
-        setErrorMsg("");
+        //  return parsed JSON to the next .then
         return response.json();
       } else {
-        console.log("Update response:", data);
-        // ❌ If request failed, throw an error
-        setErrorMsg("Error updating room!😒")
-        setSuccessMsg("");
-        throw new Error("Update failed");
+        // trigger error so we skip the next .then
+        throw new Error("Error updating room");
       }
     })
     .then((data) => {
-      setSuccessMsg("Room updated successfully!😜")
-      // You could show a message to the user or call props.updateCallback()
+      console.log("Update response:", data); // ✅ now safe, because `data` is defined
+      setSuccessMsg("Room updated successfully! 😜");
+      setErrorMsg("");
+
+      // Run parent callback if passed
       if (props.updateCallback) {
         props.updateCallback();
       }
     })
     .catch((error) => {
       console.error("Update failed:", error);
+      setErrorMsg("Error updating room! 😒");
+      setSuccessMsg("");
     });
 };
 
@@ -113,7 +112,7 @@ const updateButtonPressed = () => {
           <Button
             color="primary"
             variant="contained"
-            onClick={updateButtonPressed}
+            onClick={handleRoomButtonPressed}
             style={{ marginRight: 10 }}
           >
             Create A Room
@@ -139,7 +138,7 @@ const updateButtonPressed = () => {
         <Button
           color="primary"
           variant="contained"
-          onClick={handleRoomButtonPressed}
+          onClick={updateButtonPressed}
           style={{ marginRight: 10 }}
         >
           Update Room
@@ -165,7 +164,11 @@ const updateButtonPressed = () => {
       <Grid item xs={12} sm={8} md={6} lg={4} align="center">
         <Grid item xs={12} sm={8} md={6} lg={4} align="center">
             <Collapse in={errorMsg != "" || successMsg != ""}>
-              <Alert severity={successMsg ? "success" : "error"}>{successMsg || errorMsg} </Alert>
+              {successMsg ? (
+                <Alert severity="success" onClose={() => setSuccessMsg("")}>{successMsg}</Alert>
+              ) : (
+                <Alert severity="error" onClose={() => setErrorMsg("")}>{errorMsg}</Alert>
+              )}
             </Collapse>
         </Grid>
         {/* Title */}

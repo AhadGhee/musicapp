@@ -31,10 +31,10 @@ export default function RoomJoinPage() {
     fetch("/api/join-room", requestOptions)
       .then((response) => {
         if (response.ok) {
-          // ✅ navigate to the room page if success
+          //  navigate to the room page if success
           navigate(`/room/${roomCode}`);
         } else {
-          // ❌ show error message if room not found
+          //  show error message if room not found
           setError("Room not found.");
         }
       })
