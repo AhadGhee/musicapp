@@ -61,7 +61,11 @@ class GetRoom(APIView):
     # Handle GET requests
     def get(self, request, format=None):
         # Extract the "code" parameter from the URL (None if missing)
+
         code = request.GET.get('code')
+        # print("Room Code from request:", code)
+        # print("Rooms in DB:", Room.objects.values_list("code", flat=True))
+
         # Case 1: If a code is provided
         if code is not None:
             # Query the database for rooms with this code

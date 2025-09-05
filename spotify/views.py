@@ -7,9 +7,12 @@ from rest_framework.views import APIView
 from requests import Request, post
 from rest_framework import status
 from rest_framework.response import Response
-from .util import update_or_create_user_tokens, is_spotify_authenticated
+#from .util import update_or_create_user_tokens, is_spotify_authenticated
 from django.shortcuts import redirect, render
 from urllib.parse import urlencode
+from api.models import Room
+from .util import *
+from requests import get, post
 
 # class AuthURL(APIView):
 #     def get(self, request, format=None):
@@ -42,6 +45,7 @@ class AuthURL(APIView):
         # print("REDIRECT_URI:", REDIRECT_URI)
         # print("Generated Auth URL:", url)
         # print("Auth URL:", url)  # ✅ This will now print properly in Django logs
+       # user-read-currently-playing
 
         return Response({'url': url}, status=status.HTTP_200_OK)
     
@@ -83,3 +87,38 @@ class IsAuthenticated(APIView):
         is_authenticated = is_spotify_authenticated(self.request.session.session_key)
         print(is_spotify_authenticated)
         return Response({'status' : is_authenticated}, status=status.HTTP_200_OK)
+    
+# class CurrentSong(APIView):
+#     def get(self, request, format=None):
+#         room_code = self.request.session.get('room_code')
+#         session_id = self.request.session.session_key
+#         song = execute_spotify_api_request(session_id, "player/currently-playing")
+#         room = Room.objects.filter(code=room_code)
+#         if room.exists():
+#             room = room[0]
+#         else:
+#             return Response({}, status=status.HTTP_404_NOT_FOUND)
+#         host = room.host # have the host now
+#         endpoint = "player/current-playing"
+#         response = execute_spotify_api_request (host, endpoint)
+#         print(response)
+
+#         return Response(song, status=status.HTTP_200_OK)
+
+class CurrentSong(APIView):
+    def get(self, request, format=None):
+        room_code = self.request.session.get('room_code')
+        if not room_code:
+            return Response({"Error": "No room code in session"}, status=status.HTTP_400_BAD_REQUEST)
+
+        room = Room.objects.filter(code=room_code).first()
+        if not room:
+            return Response({"Error": "Room not found"}, status=status.HTTP_404_NOT_FOUND)
+
+        # Always use the host's session (since the host authenticated Spotify)
+        host = room.host
+        endpoint = "player/currently-playing"
+
+        song = execute_spotify_api_request(host, endpoint)
+
+        return Response(song, status=status.HTTP_200_OK)
