@@ -13,6 +13,7 @@ export default function Room() {
     const [guestCanPause, setGuestCanPause] = useState(false);
     const [isHost, setIsHost] = useState(false);
     const [showSettings, setShowSettings] = useState(false);
+    const [spotifyAuthenticated, setSpotifyAuthenticated] = useState(false);
 
     const { roomCode } = useParams();
     const navigate = useNavigate();
@@ -30,11 +31,27 @@ export default function Room() {
             setVotesToSkip(data.votes_to_skip);
             setGuestCanPause(data.guest_can_pause);
             setIsHost(data.is_host);
+            if (data.is_host) {
+                authenticateSpotify();
+        }
+
         })
         .catch((error) => {
             console.error("Error fetching room details:", error);
         });
+
     };
+
+    const authenticateSpotify = () => {
+        fetch('/spotify/is-authenticated').then((response) => response.json()).then((data) => {
+            setSpotifyAuthenticated(data.status);
+            if (!data.status) {
+                fetch('/spotify/get-auth-url').then((response) => response.json()).then((data) => {
+                    window.location.replace(data.url);
+                })
+            }
+        })
+    }
 
     // -------------------------------
     // useEffect runs on mount/roomCode change

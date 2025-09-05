@@ -121,8 +121,9 @@ const updateButtonPressed = () => {
           <Button
             color="secondary"
             variant="contained"
-            to="/"
-            component={Link}
+            // to="/"
+            // component={Link}
+            onClick={() => navigate("/")}
           >
             Back
           </Button>
