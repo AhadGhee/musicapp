@@ -38,13 +38,13 @@ export default function HomePage() {
     return (
       <Grid
         container
-        spacing={2}
-        direction="column" // stack items vertically
-        alignItems="center" // center horizontally
-        justifyContent="center" // center vertically
-        style={{ minHeight: "100vh" }} // take full screen height
+        spacing={3}
+        direction="column"
+        alignItems="center"
+        justifyContent="center"
+        style={{ minHeight: "100vh" }}
       >
-        <Grid container spacing={3}>
+        {/* <Grid container spacing={3}> */}
           <Grid item xs={12} align="center">
             <Typography variant="h3" component="h3">
               House Party
@@ -61,7 +61,7 @@ export default function HomePage() {
               </Button>
             </ButtonGroup>
           </Grid>
-        </Grid>
+        {/* </Grid> */}
       </Grid>
     );
   };

@@ -6,6 +6,7 @@ import Typography from "@mui/material/Typography";
 import { Link } from 'react-router-dom';
 import { Navigate } from "react-router-dom"; 
 import CreateRoomPage from './CreateRoomPage';
+import MusicPlayer from "./MusicPlayer"
 
 export default function Room() {
     // Define state using useState
@@ -14,9 +15,18 @@ export default function Room() {
     const [isHost, setIsHost] = useState(false);
     const [showSettings, setShowSettings] = useState(false);
     const [spotifyAuthenticated, setSpotifyAuthenticated] = useState(false);
+    const [song, setSong] = useState(null);
 
     const { roomCode } = useParams();
     const navigate = useNavigate();
+
+    // const componentDidMount = () => {
+    //     const song_interval = setInterval(getCurrentSong, 1000)
+    // }
+
+    // const componentWillUnmount = () => {
+    //     clearInterval(song_interval)
+    // }
 
     const getRoomDetails = () => {
         fetch("/api/get-room?code=" + roomCode)
@@ -56,9 +66,39 @@ export default function Room() {
     // -------------------------------
     // useEffect runs on mount/roomCode change
     // -------------------------------
+
+    useEffect(() => {
+    const song_interval = setInterval(() => {
+        getCurrentSong();   // fetch current playing song
+    }, 1000);
+
+    // cleanup function (clears interval when component unmounts / roomCode changes)
+    return () => clearInterval(song_interval);
+    }, [roomCode]);
+
+
     useEffect(() => {
         getRoomDetails();
+        //componentDidMount();
+        //getCurrentSong();
     }, [roomCode]);
+
+    const getCurrentSong = () => {
+    fetch("/spotify/current-song")
+        .then((response) => {
+        if (!response.ok) {
+            // If the response is not OK, return an empty object
+            return {};
+        }
+        // If response is OK, parse JSON and return it
+        return response.json();
+        })
+        .then((data) => {
+        // Wrap the result into an object with a key `song`
+        setSong(data);
+        })
+        .catch((error) => console.error("Error fetching song:", error));
+    };
 
 
     const leaveButtonPressed = () => {
@@ -71,7 +111,7 @@ export default function Room() {
     fetch("/api/leave-room", requestOptions)
         .then((response) => {
         if (response.ok) {
-            // ✅ if backend successfully processed the request
+            //  if backend successfully processed the request
             navigate("/"); // redirect user back to homepage
         } else {
             console.error("Failed to leave the room");
@@ -131,13 +171,35 @@ export default function Room() {
     
     return (
     <div>
-        <Grid container spacing={1}>
+        {/* <Grid container spacing={1}> */}
+        <Grid
+            container
+            spacing={3}
+            direction="column"
+            alignItems="center"
+            justifyContent="center"
+            style={{ minHeight: "100vh" }}
+            >
             <Grid item xs={12} align="center">
                 <Typography variant="h6" component="h6">
                     Code: {roomCode}
                 </Typography>
             </Grid>
-            <Grid item xs={12} align="center">
+            {song ? (
+                <Grid item xs={12} align="center">
+                    <Typography variant="h6" component="h6">
+                    {song.title} - {song.artist}
+                    </Typography>
+                    {/* <img src={song.image_url} alt="Album cover" style={{ width: "200px" }} /> */}
+                </Grid>
+                
+                ) : (
+                <Typography variant="h6" component="h6">
+                    No song playing
+                </Typography>
+                )}
+                <MusicPlayer song={song}/>
+            {/* <Grid item xs={12} align="center">
                 <Typography variant="h6" component="h6">
                     Votes: {votesToSkip}
                 </Typography>
@@ -151,7 +213,7 @@ export default function Room() {
                 <Typography variant="h6" component="h6">
                     Host: {isHost.toString()}
                 </Typography>
-            </Grid>
+            </Grid> */}
             { isHost ? renderSettingsButton() : null }
             <Grid item xs={12} align="center">
                 <Button 
@@ -162,6 +224,7 @@ export default function Room() {
                         Leave Room
                     </Button>
             </Grid>
+        {/* </Grid> */}
         </Grid>
 
 

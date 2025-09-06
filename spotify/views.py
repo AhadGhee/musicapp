@@ -88,22 +88,7 @@ class IsAuthenticated(APIView):
         print(is_spotify_authenticated)
         return Response({'status' : is_authenticated}, status=status.HTTP_200_OK)
     
-# class CurrentSong(APIView):
-#     def get(self, request, format=None):
-#         room_code = self.request.session.get('room_code')
-#         session_id = self.request.session.session_key
-#         song = execute_spotify_api_request(session_id, "player/currently-playing")
-#         room = Room.objects.filter(code=room_code)
-#         if room.exists():
-#             room = room[0]
-#         else:
-#             return Response({}, status=status.HTTP_404_NOT_FOUND)
-#         host = room.host # have the host now
-#         endpoint = "player/current-playing"
-#         response = execute_spotify_api_request (host, endpoint)
-#         print(response)
 
-#         return Response(song, status=status.HTTP_200_OK)
 
 class CurrentSong(APIView):
     def get(self, request, format=None):
@@ -121,4 +106,36 @@ class CurrentSong(APIView):
 
         song = execute_spotify_api_request(host, endpoint)
 
-        return Response(song, status=status.HTTP_200_OK)
+        if 'error' in song or 'item' not in song: 
+            return Response({}, status=status.HTTP_204_NO_CONTENT)
+        
+        item = song.get('item')
+        if item is None:
+            return Response({"song": None}, status=status.HTTP_200_OK)
+        duration = item.get('duration_ms')
+        progress = song.get('progress_ms')
+        album_cover = item.get('album').get('images')[0].get('url')
+        is_playing = song.get('is_playing')
+        song_id = item.get('id')
+
+
+        artist_string =""
+
+        for i, artist in enumerate(item.get('artists')):
+            if i > 0:
+                artist_string += ", "
+            name = artist.get('name')
+            artist_string += name
+        song_info = {
+            'title': item.get('name'),
+            'artist' : artist_string,
+            'duration' : duration,
+            'time' : progress,
+            'image_url' : album_cover,
+            'is_playing' : is_playing,
+            'votes' : 0,
+            'id': song_id
+        }
+
+
+        return Response(song_info, status=status.HTTP_200_OK)

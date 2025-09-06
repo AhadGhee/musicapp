@@ -24,7 +24,7 @@ export default function RoomJoinPage() {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        code: roomCode, // send the roomCode entered by user
+      code: roomCode, // send the roomCode entered by user
       }),
     };
 
@@ -33,6 +33,7 @@ export default function RoomJoinPage() {
         if (response.ok) {
           //  navigate to the room page if success
           navigate(`/room/${roomCode}`);
+          console.log(roomCode)
         } else {
           //  show error message if room not found
           setError("Room not found.");
